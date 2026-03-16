@@ -1,0 +1,37 @@
+services:
+  ollama:
+    image: ollama/ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+
+  # Pulls the model after Ollama is healthy (one-shot init container)
+  ollama-init:
+    image: ollama/ollama
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: ["ollama", "pull", "qwen3:0.6b"]
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+
+  a2a-server:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_MODEL=qwen3:0.6b
+      - LOG_LEVEL=info
+    depends_on:
+      ollama-init:
+        condition: service_completed_successfully
+
+volumes:
+  ollama_data:
