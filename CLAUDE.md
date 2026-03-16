@@ -41,4 +41,4 @@ Swift SDK for the A2A (Agent-to-Agent) protocol v1.0.
 - Run specific suite: `swift test --filter EventQueueManagerTests`
 
 ## Current Version
-- Latest release: `0.1.1` (EventQueueManager bugfix for closed queue reuse)
+- Latest release: `0.2.0` (spec compliance: align wire format with A2A v1.0 proto)

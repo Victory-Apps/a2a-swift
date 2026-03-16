@@ -9,7 +9,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/vapor/vapor.git", from: "4.100.0"),
-        .package(url: "https://github.com/Victory-Apps/a2a-swift.git", from: "0.1.1"),
+        .package(url: "https://github.com/Victory-Apps/a2a-swift.git", from: "0.2.0"),
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.20.0"),
     ],
     targets: [

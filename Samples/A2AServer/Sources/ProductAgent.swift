@@ -95,6 +95,8 @@ struct ProductAgent: AgentExecutor {
                     messages.append(.user(text))
                 case .agent:
                     messages.append(.assistant(text))
+                case .unspecified:
+                    break
                 }
             }
 
