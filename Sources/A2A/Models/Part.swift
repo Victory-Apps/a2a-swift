@@ -1,7 +1,15 @@
 import Foundation
 
-/// Represents a piece of content within a Message or Artifact.
-/// A Part can contain text, raw binary data, a URL, or structured data.
+/// A piece of content within a ``Message`` or ``Artifact``.
+///
+/// A Part can contain text, raw binary data, a URL, or structured JSON data.
+/// Use the convenience factory methods for type-safe construction:
+///
+/// ```swift
+/// let text = Part.text("Hello")
+/// let image = Part.url("https://example.com/image.png", mediaType: "image/png")
+/// let data = Part.data(["key": "value"])
+/// ```
 public struct Part: Codable, Sendable, Hashable {
     /// Text content.
     public var text: String?

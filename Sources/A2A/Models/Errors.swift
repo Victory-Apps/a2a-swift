@@ -1,6 +1,10 @@
 import Foundation
 
 /// A2A protocol error codes mapped to JSON-RPC error codes.
+///
+/// Includes both A2A-specific errors (task not found, unsupported operation, etc.)
+/// and standard JSON-RPC errors (parse error, method not found, etc.).
+/// Each code maps to an appropriate HTTP status code via ``httpStatusCode``.
 public enum A2AErrorCode: Int, Sendable {
     // A2A-specific errors
     case taskNotFound = -32001

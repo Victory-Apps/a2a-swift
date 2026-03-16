@@ -64,7 +64,22 @@ public struct TaskArtifactUpdateEvent: Codable, Sendable, Hashable {
     }
 }
 
-/// A streaming response that can contain one of several payload types.
+/// A streaming response event delivered via SSE.
+///
+/// Each event in a streaming response is one of these variants. Consume them
+/// by iterating the `AsyncThrowingStream` returned from
+/// ``A2AClient/sendStreamingMessage(_:)`` or ``A2AClient/subscribeToTask(_:)``.
+///
+/// ```swift
+/// for try await event in stream {
+///     switch event {
+///     case .task(let task): // Initial task snapshot
+///     case .statusUpdate(let update): // State changes
+///     case .artifactUpdate(let update): // Output chunks
+///     case .message(let msg): // Agent messages
+///     }
+/// }
+/// ```
 public enum StreamResponse: Codable, Sendable, Hashable {
     case task(A2ATask)
     case message(Message)

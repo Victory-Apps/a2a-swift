@@ -2,12 +2,19 @@ import Foundation
 
 /// The role of the message sender.
 public enum Role: String, Codable, Sendable, Hashable {
+    /// Unspecified role (default/unknown).
     case unspecified = "ROLE_UNSPECIFIED"
+    /// A message from the client (human or calling agent).
     case user = "ROLE_USER"
+    /// A message from the agent.
     case agent = "ROLE_AGENT"
 }
 
 /// A message exchanged between client and agent.
+///
+/// Messages carry one or more ``Part`` values as their content. They are used both
+/// as input (from the client) and in task history. Use ``Message/init(role:parts:)``
+/// for simple text messages, or include structured data, files, and URLs via ``Part``.
 public struct Message: Codable, Sendable, Hashable {
     /// Unique message identifier, created by the sender.
     public var messageId: String
