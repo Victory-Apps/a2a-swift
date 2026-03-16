@@ -182,8 +182,9 @@ public actor EventQueueManager {
     public init() {}
 
     /// Gets or creates an event queue for a task.
+    /// If the existing queue was closed (task completed), creates a fresh one.
     public func queue(for taskId: String, capacity: Int = 100) -> EventQueue {
-        if let existing = queues[taskId] {
+        if let existing = queues[taskId], !existing.closed {
             return existing
         }
         let queue = EventQueue(capacity: capacity)
