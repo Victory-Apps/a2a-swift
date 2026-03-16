@@ -62,22 +62,28 @@ public enum SecurityScheme: Codable, Sendable, Hashable {
     }
 }
 
-/// Security requirement mapping scheme names to required scopes.
-public struct SecurityRequirement: Codable, Sendable, Hashable {
-    public var schemes: [String: [String]]
+/// A list of strings, used as the value type in SecurityRequirement's map.
+/// Proto: `message StringList { repeated string list = 1; }`
+public struct StringList: Codable, Sendable, Hashable {
+    public var list: [String]
 
-    public init(schemes: [String: [String]]) {
+    public init(_ list: [String] = []) {
+        self.list = list
+    }
+}
+
+/// Security requirement mapping scheme names to required scopes.
+/// Proto: `map<string, StringList> schemes = 1`
+public struct SecurityRequirement: Codable, Sendable, Hashable {
+    public var schemes: [String: StringList]
+
+    public init(schemes: [String: StringList]) {
         self.schemes = schemes
     }
 
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.singleValueContainer()
-        self.schemes = try container.decode([String: [String]].self)
-    }
-
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.singleValueContainer()
-        try container.encode(schemes)
+    /// Convenience initializer accepting plain `[String: [String]]`.
+    public init(_ schemes: [String: [String]]) {
+        self.schemes = schemes.mapValues { StringList($0) }
     }
 }
 
