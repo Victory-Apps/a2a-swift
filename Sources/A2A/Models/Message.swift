@@ -2,6 +2,7 @@ import Foundation
 
 /// The role of the message sender.
 public enum Role: String, Codable, Sendable, Hashable {
+    case unspecified = "ROLE_UNSPECIFIED"
     case user = "ROLE_USER"
     case agent = "ROLE_AGENT"
 }

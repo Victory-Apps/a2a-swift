@@ -98,6 +98,7 @@ struct ModelTests {
         #expect(!TaskState.working.isTerminal)
         #expect(!TaskState.submitted.isTerminal)
         #expect(!TaskState.inputRequired.isTerminal)
+        #expect(!TaskState.unspecified.isTerminal)
     }
 
     @Test func taskStateInterrupted() {
@@ -105,6 +106,7 @@ struct ModelTests {
         #expect(TaskState.authRequired.isInterrupted)
         #expect(!TaskState.working.isInterrupted)
         #expect(!TaskState.completed.isInterrupted)
+        #expect(!TaskState.unspecified.isInterrupted)
     }
 
     @Test func taskStateEncoding() throws {
@@ -112,6 +114,23 @@ struct ModelTests {
         let data = try encoder.encode(state)
         let string = String(data: data, encoding: .utf8)!
         #expect(string.contains("TASK_STATE_COMPLETED"))
+
+        let unspecified = TaskState.unspecified
+        let unspecifiedData = try encoder.encode(unspecified)
+        let unspecifiedString = String(data: unspecifiedData, encoding: .utf8)!
+        #expect(unspecifiedString.contains("TASK_STATE_UNSPECIFIED"))
+    }
+
+    @Test func roleEncoding() throws {
+        let user = Role.user
+        let data = try encoder.encode(user)
+        let string = String(data: data, encoding: .utf8)!
+        #expect(string.contains("ROLE_USER"))
+
+        let unspecified = Role.unspecified
+        let unspecifiedData = try encoder.encode(unspecified)
+        let unspecifiedString = String(data: unspecifiedData, encoding: .utf8)!
+        #expect(unspecifiedString.contains("ROLE_UNSPECIFIED"))
     }
 
     // MARK: - Task

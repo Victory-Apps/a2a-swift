@@ -30,7 +30,7 @@ public enum JSONRPCId: Codable, Sendable, Hashable {
     }
 }
 
-/// A2A JSON-RPC method names.
+/// A2A JSON-RPC method names (v1.0 spec, Section 9).
 public enum A2AMethod: String, Codable, Sendable {
     case sendMessage = "SendMessage"
     case sendStreamingMessage = "SendStreamingMessage"

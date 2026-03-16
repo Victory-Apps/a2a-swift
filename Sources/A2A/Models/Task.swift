@@ -2,6 +2,7 @@ import Foundation
 
 /// The state of a task.
 public enum TaskState: String, Codable, Sendable, Hashable {
+    case unspecified = "TASK_STATE_UNSPECIFIED"
     case submitted = "TASK_STATE_SUBMITTED"
     case working = "TASK_STATE_WORKING"
     case completed = "TASK_STATE_COMPLETED"

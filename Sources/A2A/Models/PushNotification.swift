@@ -70,19 +70,25 @@ public struct GetTaskPushNotificationConfigRequest: Codable, Sendable, Hashable 
 public struct ListTaskPushNotificationConfigsRequest: Codable, Sendable, Hashable {
     public var tenant: String?
     public var taskId: String
+    public var pageSize: Int?
+    public var pageToken: String?
 
-    public init(tenant: String? = nil, taskId: String) {
+    public init(tenant: String? = nil, taskId: String, pageSize: Int? = nil, pageToken: String? = nil) {
         self.tenant = tenant
         self.taskId = taskId
+        self.pageSize = pageSize
+        self.pageToken = pageToken
     }
 }
 
 /// Response from listing push notification configs.
 public struct ListTaskPushNotificationConfigsResponse: Codable, Sendable, Hashable {
     public var configs: [TaskPushNotificationConfig]
+    public var nextPageToken: String?
 
-    public init(configs: [TaskPushNotificationConfig]) {
+    public init(configs: [TaskPushNotificationConfig], nextPageToken: String? = nil) {
         self.configs = configs
+        self.nextPageToken = nextPageToken
     }
 }
 

@@ -102,9 +102,18 @@ struct AgentCardTests {
     }
 
     @Test func securityRequirement() throws {
-        let req = SecurityRequirement(schemes: ["bearer": ["read", "write"]])
+        let req = SecurityRequirement(schemes: ["bearer": StringList(["read", "write"])])
         let data = try encoder.encode(req)
+        let json = String(data: data, encoding: .utf8)!
+        // Verify proto-compliant format: {"schemes":{"bearer":{"list":["read","write"]}}}
+        #expect(json.contains("\"schemes\""))
+        #expect(json.contains("\"list\""))
         let decoded = try decoder.decode(SecurityRequirement.self, from: data)
-        #expect(decoded.schemes["bearer"] == ["read", "write"])
+        #expect(decoded.schemes["bearer"]?.list == ["read", "write"])
+    }
+
+    @Test func securityRequirementConvenienceInit() throws {
+        let req = SecurityRequirement(["bearer": ["read", "write"]])
+        #expect(req.schemes["bearer"]?.list == ["read", "write"])
     }
 }
