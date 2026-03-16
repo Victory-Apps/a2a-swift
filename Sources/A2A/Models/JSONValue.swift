@@ -1,6 +1,22 @@
 import Foundation
 
 /// A type-safe representation of arbitrary JSON values.
+///
+/// `JSONValue` is used throughout the SDK for metadata, extension parameters,
+/// and other dynamic JSON fields. It conforms to Swift literal protocols for
+/// ergonomic construction:
+///
+/// ```swift
+/// let metadata: [String: JSONValue] = [
+///     "source": "swift",
+///     "count": 42,
+///     "tags": ["a2a", "agent"],
+///     "nested": ["key": "value"]
+/// ]
+/// ```
+///
+/// Access values with type-safe accessors like ``stringValue``, ``intValue``,
+/// ``arrayValue``, or use subscripts for nested access.
 public enum JSONValue: Codable, Sendable, Hashable {
     case null
     case bool(Bool)

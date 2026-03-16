@@ -1,7 +1,21 @@
 import Foundation
 
-/// Describes an A2A agent's capabilities and how to connect to it.
-/// Discoverable at `https://{domain}/.well-known/agent-card.json`.
+/// Describes an A2A agent's identity, capabilities, and connection details.
+///
+/// The agent card is the entry point for agent discovery. Clients fetch it from
+/// `https://{domain}/.well-known/agent-card.json` to learn what the agent does,
+/// what skills it supports, and how to authenticate.
+///
+/// ```swift
+/// let card = AgentCard(
+///     name: "My Agent",
+///     description: "Does useful things",
+///     supportedInterfaces: [AgentInterface(url: "https://agent.example.com")],
+///     version: "1.0.0",
+///     capabilities: AgentCapabilities(streaming: true),
+///     skills: [AgentSkill(id: "search", name: "Search", description: "Searches the web", tags: ["search"])]
+/// )
+/// ```
 public struct AgentCard: Codable, Sendable, Hashable {
     /// Display name of the agent.
     public var name: String

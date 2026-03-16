@@ -3,7 +3,29 @@ import Foundation
 import FoundationNetworking
 #endif
 
-/// A client for communicating with A2A agents.
+/// A client for communicating with A2A agents over HTTP.
+///
+/// `A2AClient` handles agent discovery, message sending (synchronous and streaming),
+/// task management, and push notification configuration. It works with any
+/// A2A-compatible agent regardless of implementation language.
+///
+/// ```swift
+/// let client = A2AClient(baseURL: URL(string: "http://localhost:8080")!)
+///
+/// // Discover the agent
+/// let card = try await client.fetchAgentCard()
+///
+/// // Send a message
+/// let response = try await client.sendMessage(SendMessageRequest(
+///     message: Message(role: .user, parts: [.text("Hello!")])
+/// ))
+///
+/// // Stream responses
+/// let stream = try await client.sendStreamingMessage(request)
+/// for try await event in stream { ... }
+/// ```
+///
+/// Add authentication via ``A2AClientInterceptor`` or the `authHeaders` parameter.
 public final class A2AClient: Sendable {
     /// The base URL of the agent.
     public let baseURL: URL

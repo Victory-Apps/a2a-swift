@@ -1,7 +1,13 @@
 import Foundation
 
-/// A thread-safe in-memory task store for A2A agents.
-/// Useful for development and testing, or as a base for custom stores.
+/// A thread-safe in-memory implementation of ``TaskStore``.
+///
+/// Suitable for development, testing, and single-instance deployments.
+/// Data is lost when the process exits. For production use with persistence,
+/// implement ``TaskStore`` with your preferred database.
+///
+/// This is the default store used by ``DefaultRequestHandler`` when no custom
+/// store is provided.
 public actor InMemoryTaskStore: TaskStore {
     private var tasks: [String: A2ATask] = [:]
     private var pushConfigs: [String: [String: TaskPushNotificationConfig]] = [:] // taskId -> configId -> config

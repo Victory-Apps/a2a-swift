@@ -1,7 +1,25 @@
 import Foundation
 
 /// Protocol for persisting and retrieving A2A tasks.
-/// Implement this protocol to provide custom storage backends (e.g., database, Redis).
+///
+/// Implement this protocol to provide custom storage backends (database, Redis, etc.).
+/// The SDK ships with ``InMemoryTaskStore`` for development and testing.
+///
+/// ```swift
+/// actor PostgresTaskStore: TaskStore {
+///     func createTask(contextId: String?, status: TaskStatus,
+///                     metadata: [String: JSONValue]?) async throws -> A2ATask {
+///         // Your persistence logic
+///     }
+///     // ... other required methods
+/// }
+///
+/// let handler = DefaultRequestHandler(
+///     executor: myAgent,
+///     card: card,
+///     store: PostgresTaskStore(pool: dbPool)
+/// )
+/// ```
 public protocol TaskStore: Sendable {
     /// Creates a new task and stores it.
     func createTask(contextId: String?, status: TaskStatus, metadata: [String: JSONValue]?) async throws -> A2ATask
