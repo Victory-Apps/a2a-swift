@@ -149,4 +149,47 @@ struct EventQueueManagerTests {
         let newQ = await manager.existingQueue(for: "task-1")
         #expect(newQ == nil)
     }
+
+    @Test func closedQueueIsReplacedWithFreshOne() async {
+        let manager = EventQueueManager()
+        let q1 = await manager.queue(for: "task-1")
+        q1.close()
+        #expect(q1.closed)
+
+        // Requesting the same task ID should return a new, open queue
+        let q2 = await manager.queue(for: "task-1")
+        #expect(q1 !== q2)
+        #expect(!q2.closed)
+    }
+
+    @Test func replacementQueueIsFullyFunctional() async {
+        let manager = EventQueueManager()
+        let q1 = await manager.queue(for: "task-1")
+        q1.close()
+
+        // Get a fresh queue for the same task
+        let q2 = await manager.queue(for: "task-1")
+        let subscription = q2.subscribe()
+
+        q2.enqueue(.message(Message(role: .agent, parts: [.text("Follow-up")])))
+        q2.close()
+
+        var events: [AgentEvent] = []
+        for await event in subscription {
+            events.append(event)
+        }
+
+        // Should receive the message + completed
+        #expect(events.count == 2)
+        if case .message(let msg) = events[0] {
+            #expect(msg.parts[0].text == "Follow-up")
+        } else {
+            Issue.record("Expected message event")
+        }
+        if case .completed = events[1] {
+            // OK
+        } else {
+            Issue.record("Expected completed event")
+        }
+    }
 }
