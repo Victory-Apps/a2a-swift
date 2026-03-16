@@ -39,15 +39,16 @@
 - `AgentCardResolver` actor with TTL-based caching for multi-agent discovery
 - Updated A2AServer sample to use `A2AVapor`
 
+### v0.4.0 — Streaming Resilience
+- SSE reconnection with configurable retry, exponential backoff, and jitter (`SSEConfiguration`)
+- `SSELineParser` for proper SSE field parsing (`data:`, `id:`, `retry:`, `event:`)
+- Server-side SSE `id:` and `retry:` field emission for reconnection support
+- `Last-Event-ID` header on reconnect with event deduplication
+- `ConnectionState` enum and `StreamingSession` type for connection health monitoring
+- `sendStreamingMessageWithSession` / `subscribeToTaskWithSession` — rich streaming APIs
+- Existing streaming methods unchanged (non-breaking)
+
 ## Short Term
-
-### A2AHummingbird Integration
-- Add `A2AHummingbird` target for Hummingbird 2.0+ integration
-- Same pattern as A2AVapor — separate product, no forced dependency
-
-### Client Enhancements
-- SSE reconnection with automatic retry and last-event-id
-- Connection health monitoring
 
 ## Medium Term
 

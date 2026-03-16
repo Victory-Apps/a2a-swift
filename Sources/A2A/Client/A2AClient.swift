@@ -45,6 +45,9 @@ public final class A2AClient: Sendable {
     /// JSON decoder configured for A2A.
     private let decoder: JSONDecoder
 
+    /// SSE streaming reconnection configuration.
+    private let sseConfiguration: SSEConfiguration
+
     /// Auto-incrementing request ID.
     private let requestIdCounter = RequestIdCounter()
 
@@ -52,12 +55,14 @@ public final class A2AClient: Sendable {
         baseURL: URL,
         session: URLSession = .shared,
         authHeaders: [String: String] = [:],
-        interceptors: [any A2AClientInterceptor] = []
+        interceptors: [any A2AClientInterceptor] = [],
+        sseConfiguration: SSEConfiguration = .default
     ) {
         self.baseURL = baseURL
         self.session = session
         self.authHeaders = authHeaders
         self.interceptors = interceptors
+        self.sseConfiguration = sseConfiguration
         self.encoder = JSONEncoder()
         self.decoder = JSONDecoder()
     }
@@ -85,7 +90,13 @@ public final class A2AClient: Sendable {
 
     /// Sends a streaming message and returns an AsyncSequence of stream responses.
     public func sendStreamingMessage(_ params: SendMessageRequest) async throws -> AsyncThrowingStream<StreamResponse, Error> {
-        try await streamingCall(method: .sendStreamingMessage, params: params)
+        let session = try await streamingCallWithSession(method: .sendStreamingMessage, params: params)
+        return session.events
+    }
+
+    /// Sends a streaming message and returns a ``StreamingSession`` with connection state monitoring.
+    public func sendStreamingMessageWithSession(_ params: SendMessageRequest) async throws -> StreamingSession {
+        try await streamingCallWithSession(method: .sendStreamingMessage, params: params)
     }
 
     // MARK: - Task Management
@@ -107,7 +118,13 @@ public final class A2AClient: Sendable {
 
     /// Subscribes to task updates via SSE.
     public func subscribeToTask(_ params: SubscribeToTaskRequest) async throws -> AsyncThrowingStream<StreamResponse, Error> {
-        try await streamingCall(method: .subscribeToTask, params: params)
+        let session = try await streamingCallWithSession(method: .subscribeToTask, params: params)
+        return session.events
+    }
+
+    /// Subscribes to task updates and returns a ``StreamingSession`` with connection state monitoring.
+    public func subscribeToTaskWithSession(_ params: SubscribeToTaskRequest) async throws -> StreamingSession {
+        try await streamingCallWithSession(method: .subscribeToTask, params: params)
     }
 
     // MARK: - Push Notifications
@@ -182,10 +199,10 @@ public final class A2AClient: Sendable {
         return result
     }
 
-    private func streamingCall<Params: Codable & Sendable>(
+    private func streamingCallWithSession<Params: Codable & Sendable>(
         method: A2AMethod,
         params: Params
-    ) async throws -> AsyncThrowingStream<StreamResponse, Error> {
+    ) async throws -> StreamingSession {
         let id = requestIdCounter.next()
         let rpcRequest = JSONRPCRequest(id: .int(id), method: method, params: params)
 
@@ -202,85 +219,207 @@ public final class A2AClient: Sendable {
             try await interceptor.before(request: &httpRequest, method: method)
         }
 
+        // Capture as immutable for use in closures
+        let baseRequest = httpRequest
         let decoder = self.decoder
+        let urlSession = self.session
+        let sseConfig = self.sseConfiguration
+
+        let (connectionStateStream, connectionStateContinuation) = AsyncStream<ConnectionState>.makeStream()
 
         #if canImport(FoundationNetworking)
         // Linux: FoundationNetworking doesn't support URLSession.bytes,
         // so we fall back to fetching the complete response and parsing SSE lines.
-        let (data, response) = try await session.data(for: httpRequest)
-        try validateHTTPResponse(response)
-
-        return AsyncThrowingStream { continuation in
-            do {
-                let text = String(data: data, encoding: .utf8) ?? ""
-                for line in text.components(separatedBy: .newlines) {
-                    let trimmed = line.trimmingCharacters(in: .whitespaces)
-                    guard trimmed.hasPrefix("data:") else { continue }
-
-                    let jsonString = String(trimmed.dropFirst(5)).trimmingCharacters(in: .whitespaces)
-                    guard !jsonString.isEmpty else { continue }
-                    guard let jsonData = jsonString.data(using: .utf8) else { continue }
-
-                    let rpcResponse = try decoder.decode(JSONRPCResponse<StreamResponse>.self, from: jsonData)
-                    if let error = rpcResponse.error {
-                        continuation.finish(throwing: A2AError(
-                            code: A2AErrorCode(rawValue: error.code) ?? .internalError,
-                            message: error.message,
-                            data: error.data
-                        ))
-                        return
-                    }
-                    if let result = rpcResponse.result {
-                        continuation.yield(result)
-                    }
-                }
-                continuation.finish()
-            } catch {
-                continuation.finish(throwing: error)
-            }
-        }
-        #else
-        let (bytes, response) = try await session.bytes(for: httpRequest)
-        try validateHTTPResponse(response)
-
-        return AsyncThrowingStream { continuation in
+        // Reconnection is supported via retry on connection failure.
+        let events = AsyncThrowingStream<StreamResponse, Error> { continuation in
             let task = Task {
-                do {
-                    for try await line in bytes.lines {
-                        guard !Task.isCancelled else { break }
+                var parser = SSELineParser()
+                var attempt = 0
 
-                        // SSE format: "data: {json}\n"
-                        let trimmed = line.trimmingCharacters(in: .whitespaces)
-                        guard trimmed.hasPrefix("data:") else { continue }
+                retryLoop: while true {
+                    do {
+                        var reconnectRequest = baseRequest
+                        if let lastId = parser.lastEventId {
+                            reconnectRequest.setValue(lastId, forHTTPHeaderField: "Last-Event-ID")
+                        }
 
-                        let jsonString = String(trimmed.dropFirst(5)).trimmingCharacters(in: .whitespaces)
-                        guard !jsonString.isEmpty else { continue }
-                        guard let jsonData = jsonString.data(using: .utf8) else { continue }
+                        let (data, response) = try await urlSession.data(for: reconnectRequest)
+                        try self.validateHTTPResponse(response)
 
-                        // Parse JSON-RPC response wrapping the StreamResponse
-                        let rpcResponse = try decoder.decode(JSONRPCResponse<StreamResponse>.self, from: jsonData)
-                        if let error = rpcResponse.error {
-                            continuation.finish(throwing: A2AError(
-                                code: A2AErrorCode(rawValue: error.code) ?? .internalError,
-                                message: error.message,
-                                data: error.data
-                            ))
+                        if attempt > 0 {
+                            connectionStateContinuation.yield(.connected)
+                        }
+                        attempt = 0
+
+                        let text = String(data: data, encoding: .utf8) ?? ""
+                        for line in text.split(separator: "\n", omittingEmptySubsequences: false).map(String.init) {
+                            let field = parser.parse(line: line)
+                            switch field {
+                            case .data(let jsonString):
+                                guard !jsonString.isEmpty else { continue }
+                                guard let jsonData = jsonString.data(using: .utf8) else { continue }
+
+                                let rpcResponse = try decoder.decode(JSONRPCResponse<StreamResponse>.self, from: jsonData)
+                                if let error = rpcResponse.error {
+                                    continuation.finish(throwing: A2AError(
+                                        code: A2AErrorCode(rawValue: error.code) ?? .internalError,
+                                        message: error.message,
+                                        data: error.data
+                                    ))
+                                    connectionStateContinuation.finish()
+                                    return
+                                }
+                                if let result = rpcResponse.result {
+                                    continuation.yield(result)
+                                }
+                            default:
+                                break
+                            }
+                        }
+                        // Normal completion
+                        continuation.finish()
+                        connectionStateContinuation.finish()
+                        return
+
+                    } catch let error as A2AError {
+                        // JSON-RPC errors are not retryable
+                        continuation.finish(throwing: error)
+                        connectionStateContinuation.yield(.disconnected(error))
+                        connectionStateContinuation.finish()
+                        return
+                    } catch {
+                        guard !Task.isCancelled else {
+                            continuation.finish(throwing: error)
+                            connectionStateContinuation.finish()
                             return
                         }
-                        if let result = rpcResponse.result {
-                            continuation.yield(result)
+
+                        attempt += 1
+                        if attempt > sseConfig.maxRetries {
+                            continuation.finish(throwing: error)
+                            connectionStateContinuation.yield(.disconnected(error))
+                            connectionStateContinuation.finish()
+                            return
                         }
+
+                        connectionStateContinuation.yield(.reconnecting(attempt: attempt, maxAttempts: sseConfig.maxRetries))
+                        let delay = parser.serverRetryInterval ?? sseConfig.delay(forAttempt: attempt - 1)
+                        try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                        continue retryLoop
                     }
-                    continuation.finish()
-                } catch {
-                    continuation.finish(throwing: error)
                 }
             }
             continuation.onTermination = { _ in
                 task.cancel()
+                connectionStateContinuation.finish()
+            }
+        }
+
+        #else
+        let events = AsyncThrowingStream<StreamResponse, Error> { continuation in
+            let task = Task {
+                var parser = SSELineParser()
+                var lastSeenId: Int?
+                var attempt = 0
+
+                retryLoop: while true {
+                    do {
+                        guard !Task.isCancelled else {
+                            continuation.finish()
+                            connectionStateContinuation.finish()
+                            return
+                        }
+
+                        var reconnectRequest = baseRequest
+                        if let lastId = parser.lastEventId {
+                            reconnectRequest.setValue(lastId, forHTTPHeaderField: "Last-Event-ID")
+                        }
+
+                        let (bytes, response) = try await urlSession.bytes(for: reconnectRequest)
+                        try self.validateHTTPResponse(response)
+
+                        if attempt > 0 {
+                            connectionStateContinuation.yield(.connected)
+                        }
+                        attempt = 0
+
+                        for try await line in bytes.lines {
+                            guard !Task.isCancelled else { break }
+
+                            let field = parser.parse(line: line)
+                            switch field {
+                            case .data(let jsonString):
+                                guard !jsonString.isEmpty else { continue }
+                                guard let jsonData = jsonString.data(using: .utf8) else { continue }
+
+                                // Deduplicate after reconnect
+                                if let lastId = parser.lastEventId, let idNum = Int(lastId),
+                                   let seen = lastSeenId, idNum <= seen {
+                                    continue
+                                }
+                                if let lastId = parser.lastEventId, let idNum = Int(lastId) {
+                                    lastSeenId = idNum
+                                }
+
+                                let rpcResponse = try decoder.decode(JSONRPCResponse<StreamResponse>.self, from: jsonData)
+                                if let error = rpcResponse.error {
+                                    continuation.finish(throwing: A2AError(
+                                        code: A2AErrorCode(rawValue: error.code) ?? .internalError,
+                                        message: error.message,
+                                        data: error.data
+                                    ))
+                                    connectionStateContinuation.finish()
+                                    return
+                                }
+                                if let result = rpcResponse.result {
+                                    continuation.yield(result)
+                                }
+                            default:
+                                break
+                            }
+                        }
+                        // Normal completion
+                        continuation.finish()
+                        connectionStateContinuation.finish()
+                        return
+
+                    } catch let error as A2AError {
+                        // JSON-RPC errors are not retryable
+                        continuation.finish(throwing: error)
+                        connectionStateContinuation.yield(.disconnected(error))
+                        connectionStateContinuation.finish()
+                        return
+                    } catch {
+                        guard !Task.isCancelled else {
+                            continuation.finish(throwing: error)
+                            connectionStateContinuation.finish()
+                            return
+                        }
+
+                        attempt += 1
+                        if attempt > sseConfig.maxRetries {
+                            continuation.finish(throwing: error)
+                            connectionStateContinuation.yield(.disconnected(error))
+                            connectionStateContinuation.finish()
+                            return
+                        }
+
+                        connectionStateContinuation.yield(.reconnecting(attempt: attempt, maxAttempts: sseConfig.maxRetries))
+                        let delay = parser.serverRetryInterval ?? sseConfig.delay(forAttempt: attempt - 1)
+                        try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+                        continue retryLoop
+                    }
+                }
+            }
+            continuation.onTermination = { _ in
+                task.cancel()
+                connectionStateContinuation.finish()
             }
         }
         #endif
+
+        connectionStateContinuation.yield(.connected)
+        return StreamingSession(events: events, connectionState: connectionStateStream)
     }
 
     private func applyHeaders(to request: inout URLRequest) {
