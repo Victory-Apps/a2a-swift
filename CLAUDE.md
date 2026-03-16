@@ -43,4 +43,4 @@ Swift SDK for the A2A (Agent-to-Agent) protocol v1.0.
 - Run specific suite: `swift test --filter EventQueueManagerTests`
 
 ## Current Version
-- Latest release: `0.3.0` (A2AVapor integration target, AgentCardResolver with caching)
+- Latest release: `0.4.0` (SSE reconnection, connection health monitoring, streaming session API)

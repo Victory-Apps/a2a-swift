@@ -179,4 +179,4 @@ https://my-agent.example.com
 
 The only requirement is that the agent serves:
 - `GET /.well-known/agent-card.json` — agent card
-- `POST /` — JSON-RPC endpoint (message/send or message/sendStream)
+- `POST /` — JSON-RPC endpoint (SendMessage or SendStreamingMessage)

@@ -73,10 +73,11 @@ curl -X POST http://localhost:8080 \
   -d '{
     "jsonrpc": "2.0",
     "id": 1,
-    "method": "message/send",
+    "method": "SendMessage",
     "params": {
       "message": {
-        "role": "user",
+        "messageId": "msg-1",
+        "role": "ROLE_USER",
         "parts": [{"text": "What laptops do you have?"}]
       }
     }
@@ -92,10 +93,11 @@ curl -X POST http://localhost:8080 \
   -d '{
     "jsonrpc": "2.0",
     "id": 1,
-    "method": "message/sendStream",
+    "method": "SendStreamingMessage",
     "params": {
       "message": {
-        "role": "user",
+        "messageId": "msg-1",
+        "role": "ROLE_USER",
         "parts": [{"text": "Compare your most expensive and cheapest products"}]
       }
     }
@@ -112,10 +114,11 @@ curl -X POST http://localhost:8080 \
   -d '{
     "jsonrpc": "2.0",
     "id": 2,
-    "method": "message/sendStream",
+    "method": "SendStreamingMessage",
     "params": {
       "message": {
-        "role": "user",
+        "messageId": "msg-2",
+        "role": "ROLE_USER",
         "parts": [{"text": "Which one has better reviews?"}],
         "taskId": "TASK_ID_FROM_PREVIOUS_RESPONSE"
       }
@@ -226,9 +229,7 @@ Replace `products.json` with your own catalog. The expected format:
     "price": 999.99,
     "category": "Category",
     "inStock": true,
-    "specs": {
-      "key": "value"
-    }
+    "tags": ["keyword1", "keyword2"]
   }
 ]
 ```
