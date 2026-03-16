@@ -189,6 +189,10 @@ struct AppleIntelligenceAgent: AgentExecutor {
 
 Complete, runnable applications in [`Samples/`](Samples/):
 
+<p align="center">
+  <img src="Samples/A2AChatClient/screenshot.png" alt="A2A Chat Client — macOS SwiftUI app connected to the product catalog agent" width="680">
+</p>
+
 | Sample | Description | Stack |
 |--------|-------------|-------|
 | [**A2AServer**](Samples/A2AServer/) | Dockerized product catalog agent with Ollama LLM, streaming responses, and conversation memory | Vapor · Docker · Ollama |
