@@ -12,7 +12,7 @@ Add A2A to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/Victory-Apps/a2a-swift.git", from: "0.4.0")
+    .package(url: "https://github.com/Victory-Apps/a2a-swift.git", from: "0.5.0")
 ]
 ```
 
@@ -249,6 +249,91 @@ var followUp = SendMessageRequest(
 )
 followUp.message.taskId = taskId
 let response2 = try await client.sendMessage(followUp)
+```
+
+## Testing Your Agent
+
+The `A2ATesting` library provides mocks, fixtures, and stream helpers so you can test agents without running a server or making HTTP requests.
+
+Add it to your test target:
+
+```swift
+.testTarget(name: "MyAgentTests", dependencies: [
+    .product(name: "A2ATesting", package: "a2a-swift")
+])
+```
+
+### Fixtures
+
+Every A2A type has a `.fixture()` method with sensible defaults:
+
+```swift
+import A2ATesting
+
+let card = AgentCard.fixture()                    // minimal valid card
+let card = AgentCard.fixture(name: "My Agent")    // override specific fields
+let message = Message.fixture(text: "Hello")      // user message with text
+let task = A2ATask.fixture(status: .fixture(state: .completed))
+```
+
+### Testing AgentExecutor Logic
+
+Use ``MockAgentExecutor`` presets or the ``DefaultRequestHandler`` with fixtures:
+
+```swift
+@Test func agentCompletesTask() async throws {
+    let handler = DefaultRequestHandler(
+        executor: MyAgent(),
+        card: .fixture()
+    )
+    let response = try await handler.handleSendMessage(.fixture(
+        message: .fixture(text: "What is 2+2?")
+    ))
+
+    if case .task(let task) = response {
+        #expect(task.status.state == .completed)
+        #expect(task.artifacts?.first?.parts.first?.text == "4")
+    }
+}
+```
+
+### Testing Streaming
+
+Use `collectStreamEvents` and stream assertion helpers:
+
+```swift
+@Test func agentStreamsEvents() async throws {
+    let handler = DefaultRequestHandler(executor: MyAgent(), card: .fixture())
+    let stream = try await handler.handleSendStreamingMessage(.fixture())
+    let events = try await collectStreamEvents(stream)
+
+    // Filter by type
+    #expect(!events.tasks.isEmpty)
+    #expect(events.containsStatus(.completed))
+
+    // Typed access at specific indices
+    let task = try events.task(at: 0)
+    #expect(task.status.state == .submitted)
+}
+```
+
+### Mock Client
+
+Test code that calls an A2A agent without making HTTP requests:
+
+```swift
+@Test func orchestratorDelegates() async throws {
+    let client = MockA2AClient()
+    await client.setAgentCard(.fixture(name: "Product Agent"))
+    await client.setSendMessageResponse(.task(.fixture(
+        status: .fixture(state: .completed)
+    )))
+
+    // Pass client to your orchestration code...
+
+    let count = await client.sendMessageCallCount
+    #expect(count == 1)
+}
 ```
 
 ## Next Steps

@@ -48,6 +48,14 @@
 - `sendStreamingMessageWithSession` / `subscribeToTaskWithSession` — rich streaming APIs
 - Existing streaming methods unchanged (non-breaking)
 
+### v0.5.0 — Testing Utilities
+- `A2ATesting` library target with mock client, executor, handler, and fixture builders
+- `MockA2AClient` — configurable mock with response configuration, call recording, and inspection
+- `MockAgentExecutor` — closure-based executor with `.echo()`, `.failing()`, `.completing()`, `.inputRequired()` presets
+- `MockAgentHandler` — pre-wired handler wrapping `DefaultRequestHandler` for router testing
+- Fixture builders: `.fixture()` static methods on `AgentCard`, `Message`, `A2ATask`, `Part`, `Artifact`, events
+- Stream helpers: `collectStreamEvents()`, `[StreamResponse]` filtering (`.tasks`, `.statusUpdates`), typed accessors
+
 ## Short Term
 
 ## Medium Term
@@ -67,11 +75,6 @@
 - Add support for the HTTP+JSON protocol binding alongside JSON-RPC (pending A2A spec)
 - RESTful routes: `POST /message:send`, `GET /tasks/{id}`, `POST /tasks/{id}:cancel`, etc.
 - Share the same handler/executor layer — just a different router
-
-### Testing Utilities
-- `A2ATesting` target with mock client and server
-- Fixture builders for AgentCard, Task, Message, and other protocol types
-- Test helpers for asserting streaming event sequences
 
 ### Persistent TaskStore Implementations
 - `A2ASQLite` — lightweight local persistence using GRDB
