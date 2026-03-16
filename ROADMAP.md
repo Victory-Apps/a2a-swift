@@ -90,18 +90,18 @@
 ## Distribution & Marketing
 
 ### Package Registries
-- [ ] Submit to [Swift Package Index](https://swiftpackageindex.com/add-a-package) — primary discovery channel, linked from swift.org
-- [ ] Submit to [SwiftPackageRegistry.com](https://swiftpackageregistry.com)
+- [x] Submit to [Swift Package Index](https://swiftpackageindex.com/add-a-package) — primary discovery channel, linked from swift.org *(PR open: [#12729](https://github.com/SwiftPackageIndex/PackageList/pull/12729))*
+- [x] Submit to [SwiftPackageRegistry.com](https://swiftpackageregistry.com) ✓
 
 ### A2A Ecosystem Listings
-- [ ] PR to [`a2aproject/A2A` — `docs/community.md`](https://github.com/a2aproject/A2A) — request listing as community Swift SDK (currently only Python, Go, JS, Java, .NET)
-- [ ] PR to [`ai-boost/awesome-a2a`](https://github.com/ai-boost/awesome-a2a) — most prominent A2A ecosystem list
-- [ ] PR to [`nMaroulis/awesome-a2a-libraries`](https://github.com/nMaroulis/awesome-a2a-libraries) — SDK-by-language list, no Swift entry yet
+- [ ] ~PR to [`a2aproject/A2A` — `docs/community.md`](https://github.com/a2aproject/A2A)~ — only lists official SDKs/integrations, not community libraries
+- [x] PR to [`ai-boost/awesome-a2a`](https://github.com/ai-boost/awesome-a2a) — most prominent A2A ecosystem list *(PR open: [#44](https://github.com/ai-boost/awesome-a2a/pull/44))*
+- [x] PR to [`nMaroulis/awesome-a2a-libraries`](https://github.com/nMaroulis/awesome-a2a-libraries) — SDK-by-language list *(PR open: [#3](https://github.com/nMaroulis/awesome-a2a-libraries/pull/3))*
 
 ### Swift Community
 - [ ] Nominate for [swift.org Community Showcase](https://www.swift.org/packages/showcase.html) via [Swift Forums nomination thread](https://forums.swift.org/t/nominations-for-the-packages-community-showcase-on-swift-org/68168)
-- [ ] PR to [`matteocrippa/awesome-swift`](https://github.com/matteocrippa/awesome-swift) (Network section)
-- [ ] PR to [`vsouza/awesome-ios`](https://github.com/vsouza/awesome-ios) (Networking category)
+- [x] PR to [`matteocrippa/awesome-swift`](https://github.com/matteocrippa/awesome-swift) (Network section) *(PR open: [#1896](https://github.com/matteocrippa/awesome-swift/pull/1896))*
+- [x] PR to [`vsouza/awesome-ios`](https://github.com/vsouza/awesome-ios) (Networking category) *(PR open: [#3274](https://github.com/vsouza/awesome-ios/pull/3274))*
 - [ ] Announcement post on [Swift Forums](https://forums.swift.org/)
 
 ### Newsletters & Media
