@@ -19,6 +19,10 @@ let package = Package(
             name: "A2AVapor",
             targets: ["A2AVapor"]
         ),
+        .library(
+            name: "A2ATesting",
+            targets: ["A2ATesting"]
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/vapor/vapor.git", from: "4.100.0"),
@@ -40,6 +44,16 @@ let package = Package(
             name: "A2ATests",
             dependencies: ["A2A"],
             path: "Tests/A2ATests"
+        ),
+        .target(
+            name: "A2ATesting",
+            dependencies: ["A2A"],
+            path: "Sources/A2ATesting"
+        ),
+        .testTarget(
+            name: "A2ATestingTests",
+            dependencies: ["A2ATesting"],
+            path: "Tests/A2ATestingTests"
         ),
         .testTarget(
             name: "A2AVaporTests",
