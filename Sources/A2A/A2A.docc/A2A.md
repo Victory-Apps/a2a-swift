@@ -83,6 +83,9 @@ let router = A2ARouter(handler: handler)
 - ``EventQueueManager``
 - ``EventSubscription``
 - ``StreamResponseSequence``
+- ``StreamingSession``
+- ``ConnectionState``
+- ``SSEConfiguration``
 
 ### Request & Response Types
 

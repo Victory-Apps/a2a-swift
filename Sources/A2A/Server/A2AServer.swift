@@ -232,14 +232,24 @@ public struct A2ARouter: Sendable {
 
         return AsyncThrowingStream { continuation in
             let task = Task {
+                var eventCounter = 0
                 do {
                     for try await event in stream {
                         guard !Task.isCancelled else { break }
+                        eventCounter += 1
                         let response = JSONRPCResponse(id: resolvedId, result: event)
                         let jsonData = try encoder.encode(response)
                         guard let jsonString = String(data: jsonData, encoding: .utf8) else { continue }
-                        let sseData = "data: \(jsonString)\n\n".data(using: .utf8)!
-                        continuation.yield(sseData)
+
+                        var sse = ""
+                        if eventCounter == 1 {
+                            sse += "retry: 3000\n"
+                        }
+                        sse += "id: \(eventCounter)\n"
+                        sse += "data: \(jsonString)\n"
+                        sse += "\n"
+
+                        continuation.yield(sse.data(using: .utf8)!)
                     }
                     continuation.finish()
                 } catch let error as A2AError {
@@ -249,7 +259,8 @@ public struct A2ARouter: Sendable {
                     )
                     if let errorData = try? encoder.encode(errorResponse),
                        let errorString = String(data: errorData, encoding: .utf8) {
-                        let sseData = "data: \(errorString)\n\n".data(using: .utf8)!
+                        eventCounter += 1
+                        let sseData = "id: \(eventCounter)\ndata: \(errorString)\n\n".data(using: .utf8)!
                         continuation.yield(sseData)
                     }
                     continuation.finish(throwing: error)
