@@ -12,7 +12,7 @@ Add A2A to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/Victory-Apps/a2a-swift.git", from: "0.3.0")
+    .package(url: "https://github.com/Victory-Apps/a2a-swift.git", from: "0.4.0")
 ]
 ```
 
