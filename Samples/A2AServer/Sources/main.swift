@@ -1,4 +1,4 @@
-import A2A
+import A2AVapor
 import Vapor
 
 // MARK: - Product Catalog
@@ -113,49 +113,12 @@ default: // "product"
 // MARK: - A2A Setup
 
 let handler = DefaultRequestHandler(executor: executor, card: agentCard)
-let a2aRouter = A2ARouter(handler: handler)
 
 // MARK: - Vapor App
 
 let app = try await Application.make()
 try configure(app)
 
-// Agent card discovery endpoint
-app.get(".well-known", "agent-card.json") { req async throws -> Response in
-    let data = try await a2aRouter.handleAgentCardRequest()
-    var headers = HTTPHeaders()
-    headers.add(name: .contentType, value: "application/json")
-    return Response(status: .ok, headers: headers, body: .init(data: data))
-}
-
-// JSON-RPC endpoint (handles both regular and streaming requests)
-app.post { req async throws -> Response in
-    let body = Data(buffer: req.body.data ?? ByteBuffer())
-    let result = try await a2aRouter.route(body: body)
-
-    switch result {
-    case .response(let data):
-        var headers = HTTPHeaders()
-        headers.add(name: .contentType, value: "application/json")
-        return Response(status: .ok, headers: headers, body: .init(data: data))
-
-    case .stream(let stream):
-        var headers = HTTPHeaders()
-        headers.add(name: .contentType, value: "text/event-stream")
-        headers.add(name: .cacheControl, value: "no-cache")
-        headers.add(name: .connection, value: "keep-alive")
-        let responseBody = Response.Body(asyncStream: { writer in
-            for try await chunk in stream {
-                try await writer.write(.buffer(ByteBuffer(data: chunk)))
-            }
-        })
-        return Response(status: .ok, headers: headers, body: responseBody)
-
-    case .agentCard(let data):
-        var headers = HTTPHeaders()
-        headers.add(name: .contentType, value: "application/json")
-        return Response(status: .ok, headers: headers, body: .init(data: data))
-    }
-}
+app.mountA2A(handler: handler)
 
 try await app.execute()

@@ -12,7 +12,7 @@ Add A2A to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/Victory-Apps/a2a-swift.git", from: "0.1.1")
+    .package(url: "https://github.com/Victory-Apps/a2a-swift.git", from: "0.3.0")
 ]
 ```
 
@@ -21,6 +21,14 @@ Then add it to your target:
 ```swift
 .target(name: "MyAgent", dependencies: [
     .product(name: "A2A", package: "a2a-swift")
+])
+```
+
+For Vapor integration, use `A2AVapor` instead — it re-exports `A2A` so you only need one import:
+
+```swift
+.target(name: "MyAgent", dependencies: [
+    .product(name: "A2AVapor", package: "a2a-swift")
 ])
 ```
 
@@ -95,49 +103,28 @@ let router = A2ARouter(handler: handler)
 
 ### Step 4: Integrate with an HTTP Framework
 
-The router is framework-agnostic. Here's how to integrate with Vapor:
+With `A2AVapor`, integration is a single line:
 
 ```swift
+import A2AVapor
 import Vapor
 
-app.get(".well-known", "agent-card.json") { req async throws -> Response in
-    let data = try await router.handleAgentCardRequest()
-    return Response(
-        status: .ok,
-        headers: ["Content-Type": "application/json"],
-        body: .init(data: data)
-    )
-}
-
-app.post { req async throws -> Response in
-    let body = Data(req.body.readableBytesView)
-    let result = try await router.route(body: body)
-    switch result {
-    case .response(let data):
-        return Response(
-            status: .ok,
-            headers: ["Content-Type": "application/json"],
-            body: .init(data: data)
-        )
-    case .stream(let stream):
-        // Return SSE response using Vapor's streaming support
-        return Response(
-            status: .ok,
-            headers: ["Content-Type": "text/event-stream"]
-        ) { writer in
-            for try await chunk in stream {
-                try await writer.write(.buffer(.init(data: chunk)))
-            }
-        }
-    case .agentCard(let data):
-        return Response(
-            status: .ok,
-            headers: ["Content-Type": "application/json"],
-            body: .init(data: data)
-        )
-    }
-}
+let app = try await Application.make()
+app.mountA2A(handler: handler)
+try await app.execute()
 ```
+
+This automatically registers:
+- `GET /.well-known/agent-card.json` — Agent card discovery
+- `POST /` — JSON-RPC endpoint with SSE streaming support
+
+You can also mount at a custom path:
+
+```swift
+app.mountA2A(handler: handler, path: "a2a")
+```
+
+> Note: If you're using a different HTTP framework, the ``A2ARouter`` is framework-agnostic — its ``A2ARouter/route(body:)`` method returns a ``A2ARouter/RouteResult`` that you can map to any framework's response types.
 
 ## Build a Client
 

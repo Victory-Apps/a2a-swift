@@ -48,6 +48,7 @@ let router = A2ARouter(handler: handler)
 ### Agent Discovery
 
 - ``AgentCard``
+- ``AgentCardResolver``
 - ``AgentInterface``
 - ``AgentSkill``
 - ``AgentCapabilities``

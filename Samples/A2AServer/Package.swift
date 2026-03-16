@@ -9,7 +9,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/vapor/vapor.git", from: "4.100.0"),
-        .package(url: "https://github.com/Victory-Apps/a2a-swift.git", from: "0.2.0"),
+        .package(url: "https://github.com/Victory-Apps/a2a-swift.git", from: "0.3.0"),
         .package(url: "https://github.com/swift-server/async-http-client.git", from: "1.20.0"),
     ],
     targets: [
@@ -17,7 +17,7 @@ let package = Package(
             name: "A2AServer",
             dependencies: [
                 .product(name: "Vapor", package: "vapor"),
-                .product(name: "A2A", package: "a2a-swift"),
+                .product(name: "A2AVapor", package: "a2a-swift"),
                 .product(name: "AsyncHTTPClient", package: "async-http-client"),
             ],
             path: "Sources"

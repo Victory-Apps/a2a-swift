@@ -27,25 +27,25 @@
 - Add missing pagination fields to push notification list request/response
 - Add StringList type matching proto StringList message
 
+### DocC Documentation
+- DocC catalog with getting started guide and architecture overview
+- Reference sample apps for hands-on walkthroughs
+- Hosted on Swift Package Index (auto-generated from DocC catalog)
+
+### v0.3.0 — Vapor Integration & Client Caching
+- `A2AVapor` target — one-liner Vapor integration: `app.mountA2A(handler:)`
+- Agent card serving, JSON-RPC routing, and SSE streaming handled automatically
+- Separate product in the same package (no forced Vapor dependency)
+- `AgentCardResolver` actor with TTL-based caching for multi-agent discovery
+- Updated A2AServer sample to use `A2AVapor`
+
 ## Short Term
 
-### DocC Documentation
-- Add DocC catalog with getting started guide, tutorials, and architecture overview
-- Reference sample apps for hands-on walkthroughs
-- Host on Swift Package Index (auto-generated from DocC catalog)
-- Add code-level documentation for all public APIs
-
-### HTTP Framework Integration Package
-- Add `A2AVapor` target — extract the Vapor boilerplate from the A2AServer sample into a reusable one-liner:
-  ```swift
-  app.mountA2A(handler: myHandler)
-  ```
-- Add `A2AHummingbird` target for Hummingbird integration
-- Handle agent card serving, JSON-RPC routing, and SSE streaming automatically
-- Ship as separate products in the same package (no forced dependency)
+### A2AHummingbird Integration
+- Add `A2AHummingbird` target for Hummingbird 2.0+ integration
+- Same pattern as A2AVapor — separate product, no forced dependency
 
 ### Client Enhancements
-- Agent card resolver with caching and TTL
 - SSE reconnection with automatic retry and last-event-id
 - Connection health monitoring
 
