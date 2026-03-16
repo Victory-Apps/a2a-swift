@@ -2,6 +2,10 @@ import Testing
 import Foundation
 @testable import A2A
 
+// URLProtocol subclassing is not supported on Linux's FoundationNetworking,
+// so these tests only run on Darwin platforms.
+#if !canImport(FoundationNetworking)
+
 @Suite("AgentCardResolver", .serialized)
 struct AgentCardResolverTests {
 
@@ -180,3 +184,5 @@ final class MockURLProtocol: URLProtocol, @unchecked Sendable {
 
     override func stopLoading() {}
 }
+
+#endif
