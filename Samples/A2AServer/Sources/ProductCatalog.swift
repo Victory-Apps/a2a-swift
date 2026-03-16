@@ -27,7 +27,7 @@ struct ProductCatalog: Sendable {
         let terms = query.lowercased().split(separator: " ")
         return products.filter { product in
             let searchable = "\(product.name) \(product.category) \(product.description) \(product.tags.joined(separator: " "))".lowercased()
-            return terms.allSatisfy { searchable.contains($0) }
+            return terms.contains { searchable.contains($0) }
         }
     }
 

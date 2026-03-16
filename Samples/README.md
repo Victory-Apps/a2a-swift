@@ -85,7 +85,7 @@ swift run
 │   A2AChatClient      │ ◄──── (JSON-RPC + SSE) ────► │   A2AServer          │
 │                      │                               │                      │
 │  SwiftUI + FM        │  1. Agent card discovery       │  Vapor + Ollama      │
-│  orchestration       │  2. message/send (streaming)   │  product catalog     │
+│  orchestration       │  2. SendMessage (streaming)    │  product catalog     │
 │                      │  3. Task continuations          │  conversation memory │
 └──────────────────────┘                               └──────────────────────┘
 ```
