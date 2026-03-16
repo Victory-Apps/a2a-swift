@@ -35,7 +35,7 @@ Add to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/Victory-Apps/a2a-swift.git", from: "0.1.0")
+    .package(url: "https://github.com/Victory-Apps/a2a-swift.git", from: "0.1.1")
 ]
 ```
 
@@ -180,6 +180,38 @@ struct AppleIntelligenceAgent: AgentExecutor {
 ```
 
 > Requires iOS 26+ / macOS 26+ with Apple Intelligence enabled. See [`Examples/OnDeviceLLMAgent.swift`](Examples/OnDeviceLLMAgent.swift) for the full example including structured output, and [`Examples/A2AClientApp.swift`](Examples/A2AClientApp.swift) for a SwiftUI chat client.
+
+---
+
+## Samples & Examples
+
+### Sample Apps
+
+Complete, runnable applications in [`Samples/`](Samples/):
+
+| Sample | Description | Stack |
+|--------|-------------|-------|
+| [**A2AServer**](Samples/A2AServer/) | Dockerized product catalog agent with Ollama LLM, streaming responses, and conversation memory | Vapor · Docker · Ollama |
+| [**A2AChatClient**](Samples/A2AChatClient/) | macOS chat client with multi-agent connectivity, Apple Intelligence routing, and streaming UI | SwiftUI · Foundation Models |
+
+```bash
+# Start the server (requires Docker Desktop — or run locally with swift run)
+cd Samples/A2AServer && docker compose up --build
+
+# Open the client in Xcode (requires Xcode 26+)
+cd Samples/A2AChatClient && open Package.swift
+# Build & Run (⌘R), then connect to http://localhost:8080
+```
+
+### Code Examples
+
+Single-file reference snippets in [`Examples/`](Examples/):
+
+| File | What it shows |
+|------|---------------|
+| [EchoAgent.swift](Examples/EchoAgent.swift) | `AgentExecutor` patterns — echo, streaming, multi-turn |
+| [A2AClientApp.swift](Examples/A2AClientApp.swift) | SwiftUI client with streaming & agent card discovery |
+| [OnDeviceLLMAgent.swift](Examples/OnDeviceLLMAgent.swift) | Apple Intelligence on-device agent |
 
 ---
 
@@ -407,7 +439,7 @@ Contributions are welcome! Please open an issue or submit a pull request.
 git clone https://github.com/Victory-Apps/a2a-swift.git
 cd a2a-swift
 swift build
-swift test   # 58 tests across 8 suites
+swift test   # 60 tests across 8 suites
 ```
 
 ## License
