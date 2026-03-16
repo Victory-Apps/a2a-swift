@@ -30,7 +30,9 @@ Swift SDK for the A2A (Agent-to-Agent) protocol v1.0.
 
 ## Project Structure
 - `Sources/A2A/` — Core SDK (models, client, server)
-- `Tests/A2ATests/` — Test suite (Swift Testing framework)
+- `Sources/A2AVapor/` — Vapor integration (`app.mountA2A(handler:)`)
+- `Tests/A2ATests/` — Core SDK tests (Swift Testing framework)
+- `Tests/A2AVaporTests/` — Vapor integration tests
 - `Examples/` — Single-file usage examples
 - `Samples/A2AServer/` — Dockerized Vapor server with product catalog agent + Ollama
 - `Samples/A2AChatClient/` — macOS SwiftUI chat client with Foundation Models orchestration
@@ -41,4 +43,4 @@ Swift SDK for the A2A (Agent-to-Agent) protocol v1.0.
 - Run specific suite: `swift test --filter EventQueueManagerTests`
 
 ## Current Version
-- Latest release: `0.2.0` (spec compliance: align wire format with A2A v1.0 proto)
+- Latest release: `0.3.0` (A2AVapor integration target, AgentCardResolver with caching)
