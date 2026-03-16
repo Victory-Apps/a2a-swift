@@ -21,6 +21,12 @@
 - EventQueueManager bugfix for closed queue reuse
 - 60 tests across 8 suites
 
+### v0.2.0 — Spec Compliance
+- Add UNSPECIFIED zero-value variants to TaskState and Role enums (proto3 requirement)
+- Fix SecurityRequirement encoding to use proto-compliant format with StringList wrapper
+- Add missing pagination fields to push notification list request/response
+- Add StringList type matching proto StringList message
+
 ## Short Term
 
 ### DocC Documentation
