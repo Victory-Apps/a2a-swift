@@ -91,7 +91,7 @@
 
 ### Package Registries
 - [x] Submit to [Swift Package Index](https://swiftpackageindex.com/add-a-package) — primary discovery channel, linked from swift.org
-- [ ] Submit to [SwiftPackageRegistry.com](https://swiftpackageregistry.com)
+- [x] Submit to [SwiftPackageRegistry.com](https://swiftpackageregistry.com)
 
 ### A2A Ecosystem Listings
 - [ ] PR to [`a2aproject/A2A` — `docs/community.md`](https://github.com/a2aproject/A2A) — request listing as community Swift SDK (currently only Python, Go, JS, Java, .NET)
