@@ -90,7 +90,7 @@
 ## Distribution & Marketing
 
 ### Package Registries
-- [ ] Submit to [Swift Package Index](https://swiftpackageindex.com/add-a-package) — primary discovery channel, linked from swift.org
+- [x] Submit to [Swift Package Index](https://swiftpackageindex.com/add-a-package) — primary discovery channel, linked from swift.org
 - [ ] Submit to [SwiftPackageRegistry.com](https://swiftpackageregistry.com)
 
 ### A2A Ecosystem Listings
