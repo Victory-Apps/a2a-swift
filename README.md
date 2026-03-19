@@ -1,3 +1,17 @@
+<div align="center">
+<pre>
+ █████╗  ██████╗   █████╗    ███████╗ ██╗    ██╗ ██╗ ███████╗ ████████╗
+██╔══██╗ ╚════██╗ ██╔══██╗   ██╔════╝ ██║    ██║ ██║ ██╔════╝ ╚══██╔══╝
+███████║  █████╔╝ ███████║   ███████╗ ██║ █╗ ██║ ██║ █████╗      ██║   
+██╔══██║ ██╔═══╝  ██╔══██║   ╚════██║ ██║███╗██║ ██║ ██╔══╝      ██║   
+██║  ██║ ███████╗ ██║  ██║   ███████║ ╚███╔███╔╝ ██║ ██║         ██║   
+╚═╝  ╚═╝ ╚══════╝ ╚═╝  ╚═╝   ╚══════╝  ╚══╝╚══╝  ╚═╝ ╚═╝         ╚═╝   
+</pre>
+
+<h3>⚡ Agent-to-Agent Protocol 1.0 ⚡</h3>
+
+</div>
+
 <p align="center">
   <img src="https://img.shields.io/badge/Swift-6.0+-F05138?style=flat-square&logo=swift&logoColor=white" alt="Swift 6.0+">
   <img src="https://img.shields.io/badge/Platforms-macOS%20|%20iOS%20|%20tvOS%20|%20watchOS%20|%20Linux-blue?style=flat-square" alt="Platforms">
